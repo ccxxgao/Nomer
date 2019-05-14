@@ -87,7 +87,7 @@ class ChineseInput: UIViewController, UITextFieldDelegate {
             "gender": gender!
         ]
         
-        Alamofire.request("http://127.0.0.1:5000/Chinese", method: .post, parameters: parameters).responseString { response in
+        Alamofire.request("http://ccxxgao.pythonanywhere.com/Chinese", method: .post, parameters: parameters).responseString { response in
 //            print((response.result.value!))
             if response.result.value != nil {
                 self.returned_name = response.result.value!

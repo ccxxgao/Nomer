@@ -80,7 +80,7 @@ class EnglishInput: UIViewController, UITextFieldDelegate {
         
         print(parameters)
         
-        Alamofire.request("http://127.0.0.1:5000/English", method: .post, parameters: parameters).responseString { response in
+        Alamofire.request("http://ccxxgao.pythonanywhere.com/English", method: .post, parameters: parameters).responseString { response in
 //            print((response.result.value!))
             if (response.result.value != nil){
                 self.returned_name = self.une(i : response.result.value!)
