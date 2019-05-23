@@ -1,10 +1,11 @@
 from flask import Flask
 from flask_restful import Api, Resource, reqparse
-import pinyin
+from pypinyin import pinyin, lazy_pinyin, Style
 
 import pandas as pd
 from sklearn import neighbors, datasets
 from sklearn.neighbors import NearestNeighbors
+from sklearn.neighbors import KNeighborsClassifier
 
 from googletrans import Translator
 import random
@@ -15,12 +16,6 @@ app = Flask(__name__)
 api = Api(app)
 
 C2E_names = []
-
-chinese_surnames = {"l" : "李",
-                    "w" : "王",
-                    "z" : "张",
-                    "g" : "高"
-}
 
 #name: Cecily -> Ce, ci, li
 def splitter(word):
@@ -39,8 +34,6 @@ def splitter(word):
     print(s)
     print(t)
     return t
-
-
 
 def convertToEnglish(name, gender):
     names = pd.read_csv('all_names.csv')
@@ -77,21 +70,42 @@ def convertToEnglish(name, gender):
         return i
 
 def convertToChinese(name):
+    translator = Translator()
+    
     split_name = name.split()
-    first = splitter(split_name[0])
+    first = translator.translate(split_name[0], dest='zh-cn').text
     first_name = random.sample(first, k=2)
     print(first_name)
     last_name = split_name[1]
     print(last_name)
     
-#    surnames = pd.read_csv('chinese_surnames.csv')
-#    surnames = names[['Chinese', 'Pinyin']]
-#    surnames['first_char'] = nomes['Pinyin'].apply(lambda x: get_first(x))
-    last = chinese_surnames[last_name[0].lower()]
-#    for i in chinese_surnames:
-#        if row['Pinyin'] == last_name[0]:
-#            last = row['Chinese']
-#            break
+    def get_chns_char(char):
+        return ord(char[0])
+    
+    def get_pinyin(pinyin):
+        return ord(pinyin[0])
+    
+    
+    names = ['pinyin', 'surname']
+    df = pd.read_csv('chinese_surnames.csv', names=names)
+    
+    df['pinyin'] = df['pinyin'].apply(lambda x: get_pinyin(x))
+    df['surname'] = df['surname'].apply(lambda x: get_chns_char(x))
+    
+    
+    X = df.iloc[:, 0].values
+    y = df.iloc[:, 1].values
+    
+    X = X.reshape(-1, 1)
+    
+    knn = KNeighborsClassifier(n_neighbors=1)
+    knn.fit(X, y)
+    
+    x_test = [ord(last_name[0].lower())]
+    y_pred = knn.predict([x_test])
+    
+    last = chr(y_pred)
+    
     for i in first_name:
         last += i
     return last
