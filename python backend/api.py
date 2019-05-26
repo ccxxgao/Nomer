@@ -101,7 +101,7 @@ def convertToChinese(name):
     knn = KNeighborsClassifier(n_neighbors=1)
     knn.fit(X, y)
     
-    x_test = [ord(last_name[0].lower())]
+    x_test = [ord(last_name[0])]
     y_pred = knn.predict([x_test])
     
     last = chr(y_pred)
